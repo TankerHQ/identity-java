@@ -1,0 +1,24 @@
+before_script:
+  - poetry install
+  - export PATH=$(poetry env info -p)/bin:$PATH
+
+stages:
+  - check
+  - deploy
+
+check:
+  stage: check
+  script:
+    - poetry run python run-ci.py build-and-test
+  tags:
+    - linux
+
+deploy:
+  stage: deploy
+  only:
+    - tags
+  when: manual
+  script:
+    - poetry run python run-ci.py deploy --git-tag "${CI_COMMIT_TAG}"
+  tags:
+    - linux
