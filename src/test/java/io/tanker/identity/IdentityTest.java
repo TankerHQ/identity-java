@@ -5,6 +5,7 @@ import com.goterl.lazycode.lazysodium.SodiumJava;
 import org.junit.Test;
 
 import javax.json.Json;
+import javax.json.JsonObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -23,18 +24,17 @@ public class IdentityTest {
 
     @Test
     public void testCreateIdentity() throws IOException {
-        var identity = Identity.createIdentity(appId, appSecret, "alice");
-        var reader = Json.createReader(new ByteArrayInputStream(Base64.getDecoder().decode(identity)));
+        String identity = Identity.createIdentity(appId, appSecret, "alice");
 
-        var identityObj = reader.readObject();
-        var userId = Base64.getDecoder().decode(identityObj.getString("value"));
-        var ephemeralPublicKey = Base64.getDecoder().decode(identityObj.getString("ephemeral_public_signature_key"));
-        var delegationSignature = Base64.getDecoder().decode(identityObj.getString("delegation_signature"));
+        JsonObject identityObj = Json.createReader(new ByteArrayInputStream(Base64.getDecoder().decode(identity))).readObject();
+        byte[] userId = Base64.getDecoder().decode(identityObj.getString("value"));
+        byte[] ephemeralPublicKey = Base64.getDecoder().decode(identityObj.getString("ephemeral_public_signature_key"));
+        byte[] delegationSignature = Base64.getDecoder().decode(identityObj.getString("delegation_signature"));
 
-        var signedBuffer = new ByteArrayOutputStream();
+        ByteArrayOutputStream signedBuffer = new ByteArrayOutputStream();
         signedBuffer.write(ephemeralPublicKey);
         signedBuffer.write(userId);
-        var signed = signedBuffer.toByteArray();
+        byte[] signed = signedBuffer.toByteArray();
 
         assertEquals(identityObj.getString("target"), "user");
         assertEquals(identityObj.getString("trustchain_id"), appId);
@@ -43,10 +43,10 @@ public class IdentityTest {
 
     @Test
     public void testCreateProvisionalIdentity() {
-        var email = "alice@tanker.io";
-        var identity = Identity.createProvisionalIdentity(appId, email);
+        String email = "alice@tanker.io";
+        String identity = Identity.createProvisionalIdentity(appId, email);
 
-        var identityObj = Json.createReader(new ByteArrayInputStream(Base64.getDecoder().decode(identity))).readObject();
+        JsonObject identityObj = Json.createReader(new ByteArrayInputStream(Base64.getDecoder().decode(identity))).readObject();
 
         assertEquals(identityObj.getString("trustchain_id"), appId);
         assertEquals(identityObj.getString("target"), "email");
@@ -55,11 +55,11 @@ public class IdentityTest {
 
     @Test
     public void testGetPublicIdentity() {
-        var identity = Identity.createIdentity(appId, appSecret, "alice");
-        var publicIdentity = Identity.getPublicIdentity(identity);
+        String identity = Identity.createIdentity(appId, appSecret, "alice");
+        String publicIdentity = Identity.getPublicIdentity(identity);
 
-        var identityObj = Json.createReader(new ByteArrayInputStream(Base64.getDecoder().decode(identity))).readObject();
-        var publicIdentityObj = Json.createReader(new ByteArrayInputStream(Base64.getDecoder().decode(publicIdentity))).readObject();
+        JsonObject identityObj = Json.createReader(new ByteArrayInputStream(Base64.getDecoder().decode(identity))).readObject();
+        JsonObject publicIdentityObj = Json.createReader(new ByteArrayInputStream(Base64.getDecoder().decode(publicIdentity))).readObject();
 
         assertEquals(publicIdentityObj.getString("value"), identityObj.getString("value"));
         assertEquals(publicIdentityObj.getString("target"), "user");
@@ -68,12 +68,12 @@ public class IdentityTest {
 
     @Test
     public void testGetPublicProvisionalIdentity() {
-        var email = "alice@tanker.io";
-        var identity = Identity.createProvisionalIdentity(appId, email);
-        var publicIdentity = Identity.getPublicIdentity(identity);
+        String email = "alice@tanker.io";
+        String identity = Identity.createProvisionalIdentity(appId, email);
+        String publicIdentity = Identity.getPublicIdentity(identity);
 
-        var identityObj = Json.createReader(new ByteArrayInputStream(Base64.getDecoder().decode(identity))).readObject();
-        var publicIdentityObj = Json.createReader(new ByteArrayInputStream(Base64.getDecoder().decode(publicIdentity))).readObject();
+        JsonObject identityObj = Json.createReader(new ByteArrayInputStream(Base64.getDecoder().decode(identity))).readObject();
+        JsonObject publicIdentityObj = Json.createReader(new ByteArrayInputStream(Base64.getDecoder().decode(publicIdentity))).readObject();
 
         assertEquals(publicIdentityObj.getString("public_signature_key"), identityObj.getString("public_signature_key"));
         assertEquals(publicIdentityObj.getString("public_encryption_key"), identityObj.getString("public_encryption_key"));
