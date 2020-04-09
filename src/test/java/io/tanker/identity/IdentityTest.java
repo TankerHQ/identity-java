@@ -40,4 +40,17 @@ public class IdentityTest {
         assertEquals(identityObj.getString("trustchain_id"), appId);
         assertTrue(LazySodium.cryptoSignVerifyDetached(delegationSignature, signed, signed.length, Base64.getDecoder().decode(appPublicKey)));
     }
+
+    @Test
+    public void testGetPublicIdentity() {
+        var identity = Identity.createIdentity(appId, appSecret, "alice");
+        var publicIdentity = Identity.getPublicIdentity(identity);
+
+        var identityObj = Json.createReader(new ByteArrayInputStream(Base64.getDecoder().decode(identity))).readObject();
+        var publicIdentityObj = Json.createReader(new ByteArrayInputStream(Base64.getDecoder().decode(publicIdentity))).readObject();
+
+        assertEquals(publicIdentityObj.getString("value"), identityObj.getString("value"));
+        assertEquals(publicIdentityObj.getString("target"), "user");
+        assertEquals(publicIdentityObj.getString("trustchain_id"), appId);
+    }
 }

@@ -32,5 +32,23 @@ class Identity {
                 .build()
             return toBase64(identityJson.toString().toByteArray())
         }
+
+        @JvmStatic
+        fun getPublicIdentity(identity: String): String {
+            val identityObj = Json.createReader(ByteArrayInputStream(fromBase64(identity))).readObject()
+
+            val publicIdentityObj =
+                if (identityObj.getString("target") == "user") {
+                    Json.createObjectBuilder()
+                        .add("trustchain_id", identityObj.getString("trustchain_id"))
+                        .add("target", "user")
+                        .add("value", identityObj.getString("value"))
+                        .build()
+                } else {
+                    throw IllegalArgumentException("not a valid Tanker identity")
+                }
+
+            return toBase64(publicIdentityObj.toString().toByteArray())
+        }
     }
 }
