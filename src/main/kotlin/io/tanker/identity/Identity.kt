@@ -34,6 +34,23 @@ class Identity {
         }
 
         @JvmStatic
+        fun createProvisionalIdentity(appId: String, email: String): String {
+            val signatureKeyPair = LazySodium.cryptoSignKeypair()
+            val encryptionKeyPair = LazySodium.cryptoBoxKeypair()
+
+            val identityJson = Json.createObjectBuilder()
+                .add("trustchain_id", appId)
+                .add("target", "email")
+                .add("value", email)
+                .add("public_encryption_key", toBase64(encryptionKeyPair.publicKey.asBytes))
+                .add("private_encryption_key", toBase64(encryptionKeyPair.secretKey.asBytes))
+                .add("public_signature_key", toBase64(signatureKeyPair.publicKey.asBytes))
+                .add("private_signature_key", toBase64(signatureKeyPair.secretKey.asBytes))
+                .build()
+            return toBase64(identityJson.toString().toByteArray())
+        }
+
+        @JvmStatic
         fun getPublicIdentity(identity: String): String {
             val identityObj = Json.createReader(ByteArrayInputStream(fromBase64(identity))).readObject()
 

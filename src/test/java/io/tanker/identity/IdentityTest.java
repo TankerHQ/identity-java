@@ -42,6 +42,18 @@ public class IdentityTest {
     }
 
     @Test
+    public void testCreateProvisionalIdentity() {
+        var email = "alice@tanker.io";
+        var identity = Identity.createProvisionalIdentity(appId, email);
+
+        var identityObj = Json.createReader(new ByteArrayInputStream(Base64.getDecoder().decode(identity))).readObject();
+
+        assertEquals(identityObj.getString("trustchain_id"), appId);
+        assertEquals(identityObj.getString("target"), "email");
+        assertEquals(identityObj.getString("value"), email);
+    }
+
+    @Test
     public void testGetPublicIdentity() {
         var identity = Identity.createIdentity(appId, appSecret, "alice");
         var publicIdentity = Identity.getPublicIdentity(identity);
