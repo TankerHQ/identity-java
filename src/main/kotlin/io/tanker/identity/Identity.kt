@@ -61,6 +61,14 @@ class Identity {
                         .add("target", "user")
                         .add("value", identityObj.getString("value"))
                         .build()
+                } else if (identityObj.containsKey("public_signature_key") && identityObj.containsKey("public_encryption_key")) {
+                    Json.createObjectBuilder()
+                        .add("trustchain_id", identityObj.getString("trustchain_id"))
+                        .add("target", identityObj.getString("target"))
+                        .add("value", identityObj.getString("value"))
+                        .add("public_signature_key", identityObj.getString("public_signature_key"))
+                        .add("public_encryption_key", identityObj.getString("public_encryption_key"))
+                        .build()
                 } else {
                     throw IllegalArgumentException("not a valid Tanker identity")
                 }
