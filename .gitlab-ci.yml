@@ -21,3 +21,16 @@ deploy:
     - poetry run python run-ci.py deploy --git-tag "${CI_COMMIT_TAG}"
   tags:
     - linux
+
+mirror:
+  tags:
+    - linux
+  stage: deploy
+  only:
+    # mirror only public tags, and master
+    - /\Av[0-9.]+\z/
+    - master
+  except:
+    - schedules
+  script:
+    - poetry run python run-ci.py mirror
