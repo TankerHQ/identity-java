@@ -4,6 +4,7 @@ import sys
 import cli_ui as ui
 
 import ci
+import ci.git
 import ci.gcp
 
 
