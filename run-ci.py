@@ -3,36 +3,36 @@ import sys
 
 import cli_ui as ui
 
-import ci
-import ci.git
-import ci.gcp
+import tankerci
+import tankerci.git
+import tankerci.gcp
 
 
 def build_and_test() -> None:
     ui.info_1("Building everything")
-    ci.run("./gradlew", "assemble")
+    tankerci.run("./gradlew", "assemble")
 
     ui.info_1("Running tests")
     # In case you're wondering:
     # https://stackoverflow.com/questions/50104666/gradle-difference-between-test-and-check
-    ci.run("./gradlew", "test")
+    tankerci.run("./gradlew", "test")
 
 
 def deploy(*, git_tag: str) -> None:
-    version = ci.version_from_git_tag(git_tag)
-    ci.bump_files(version)
+    version = tankerci.version_from_git_tag(git_tag)
+    tankerci.bump_files(version)
     build_and_test()
 
     ui.info_1("Deploying Identity SDK to maven.tanker.io")
-    ci.gcp.GcpProject("tanker-prod").auth()
-    ci.run("./gradlew", "publish")
+    tankerci.gcp.GcpProject("tanker-prod").auth()
+    tankerci.run("./gradlew", "publish")
 
 
 def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(title="subcommands", dest="command")
 
-    check_parser = subparsers.add_parser("build-and-test")
+    subparsers.add_parser("build-and-test")
 
     deploy_parser = subparsers.add_parser("deploy")
     deploy_parser.add_argument("--git-tag", required=True)
@@ -45,7 +45,7 @@ def main():
     elif args.command == "deploy":
         deploy(git_tag=args.git_tag)
     elif args.command == "mirror":
-        ci.git.mirror(github_url="git@github.com:TankerHQ/identity-java")
+        tankerci.git.mirror(github_url="git@github.com:TankerHQ/identity-java")
     else:
         parser.print_help()
         sys.exit(1)
