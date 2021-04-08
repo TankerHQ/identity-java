@@ -1,3 +1,5 @@
+image: registry.gitlab.com/tankerhq/docker/identity-java:latest
+
 before_script:
   - poetry install
 
