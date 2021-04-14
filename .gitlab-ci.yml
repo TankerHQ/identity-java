@@ -1,21 +1,27 @@
+include:
+  project: TankerHQ/gitlab-ci-files
+  file: /cache.yml
+  ref: 428eae8953297125aff965e14d23b7c657d515e3
+
 default:
   image: registry.gitlab.com/tankerhq/docker/identity-java:latest
   before_script:
     - poetry install
   tags:
     - linux
-    - tanker
 
 stages:
   - check
   - deploy
 
 check:
+  extends: .python-cache
   stage: check
   script:
     - poetry run python run-ci.py build-and-test
 
 deploy:
+  extends: .python-cache
   stage: deploy
   only:
     - tags
@@ -24,6 +30,7 @@ deploy:
     - poetry run python run-ci.py deploy --git-tag "${CI_COMMIT_TAG}"
 
 mirror:
+  extends: .python-cache
   stage: deploy
   only:
     # mirror only public tags, and master
