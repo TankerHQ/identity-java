@@ -3,6 +3,7 @@ package io.tanker.identity
 import java.io.ByteArrayInputStream
 import java.util.*
 import javax.json.Json
+import javax.json.JsonString
 
 class Identity {
     companion object {
@@ -69,6 +70,13 @@ class Identity {
             } else {
                 throw IllegalArgumentException("not a valid Tanker identity")
             }
+        }
+
+        @JvmStatic
+        fun upgradeIdentity(identity: String): String {
+            val identityObj = Json.createReader(ByteArrayInputStream(fromBase64(identity))).readObject()
+            val pairs = identityObj.mapValues { (_, v) -> (v as JsonString).string }.toList().toTypedArray()
+            return serializedOrderedJsonB64(*pairs)
         }
     }
 }

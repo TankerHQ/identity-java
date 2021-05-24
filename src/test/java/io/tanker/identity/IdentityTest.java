@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -79,5 +80,27 @@ public class IdentityTest {
         assertEquals(publicIdentityObj.getString("public_encryption_key"), identityObj.getString("public_encryption_key"));
         assertEquals(publicIdentityObj.getString("target"), "email");
         assertEquals(publicIdentityObj.getString("trustchain_id"), appId);
+    }
+
+    @Test
+    public void testUpgradeIdentity() {
+        Function<String, JsonObject> unJson = (identity) ->
+                Json.createReader(new ByteArrayInputStream(Base64.getDecoder().decode(identity))).readObject();
+
+        String email = "alice@tanker.io";
+        String identity = Identity.createIdentity(appId, appSecret, "alice");
+        String publicIdentity = Identity.getPublicIdentity(identity);
+        String provIdentity = Identity.createProvisionalIdentity(appId, email);
+        String publicProvIdentity = Identity.getPublicIdentity(provIdentity);
+
+        String newIdentity = Identity.upgradeIdentity(identity);
+        String newPublicIdentity = Identity.upgradeIdentity(publicIdentity);
+        String newProvIdentity = Identity.upgradeIdentity(provIdentity);
+        String newPublicProvIdentity = Identity.upgradeIdentity(publicProvIdentity);
+
+        assertEquals(unJson.apply(identity), unJson.apply(newIdentity));
+        assertEquals(unJson.apply(publicIdentity), unJson.apply(newPublicIdentity));
+        assertEquals(unJson.apply(provIdentity), unJson.apply(newProvIdentity));
+        assertEquals(unJson.apply(publicProvIdentity), unJson.apply(newPublicProvIdentity));
     }
 }
