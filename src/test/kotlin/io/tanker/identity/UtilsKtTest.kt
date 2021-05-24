@@ -1,8 +1,10 @@
 package io.tanker.identity
 
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertSame
 import org.junit.Test
+import java.util.*
 
-import org.junit.Assert.*
 
 // We test `internal` functions here, we can't call them from Java, even from the same package
 // So this is a Kotlin test
