@@ -16,11 +16,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class IdentityTest {
-    private static String appId = "tpoxyNzh0hU9G2i9agMvHyyd+pO6zGCjO9BfhrCLjd4=";
-    private static String appSecret = "cTMoGGUKhwN47ypq4xAXAtVkNWeyUtMltQnYwJhxWYSvqjPVGmXd2wwa7y17QtPTZhn8bxb015CZC/e4ZI7+MQ==";
-    private static String appPublicKey = "r6oz1Rpl3dsMGu8te0LT02YZ/G8W9NeQmQv3uGSO/jE=";
+    private static final String appId = "tpoxyNzh0hU9G2i9agMvHyyd+pO6zGCjO9BfhrCLjd4=";
+    private static final String appSecret = "cTMoGGUKhwN47ypq4xAXAtVkNWeyUtMltQnYwJhxWYSvqjPVGmXd2wwa7y17QtPTZhn8bxb015CZC/e4ZI7+MQ==";
 
-    private static LazySodiumJava LazySodium = new LazySodiumJava(new SodiumJava());
+    private static final LazySodiumJava LazySodium = new LazySodiumJava(new SodiumJava());
 
     @Test
     public void testCreateIdentity() throws IOException {
@@ -38,6 +37,7 @@ public class IdentityTest {
 
         assertEquals(identityObj.getString("target"), "user");
         assertEquals(identityObj.getString("trustchain_id"), appId);
+        String appPublicKey = "r6oz1Rpl3dsMGu8te0LT02YZ/G8W9NeQmQv3uGSO/jE=";
         assertTrue(LazySodium.cryptoSignVerifyDetached(delegationSignature, signed, signed.length, Base64.getDecoder().decode(appPublicKey)));
     }
 
