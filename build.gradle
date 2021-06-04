@@ -1,6 +1,6 @@
 plugins {
     id 'java-library'
-    id 'org.jetbrains.kotlin.jvm' version '1.3.61'
+    id 'org.jetbrains.kotlin.jvm' version '1.5.10'
 
     id 'maven-publish'
 }
@@ -12,18 +12,17 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    compile group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
-    compile group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
+    implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
+    implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
 
-    implementation "com.goterl.lazycode:lazysodium-java:4.2.6"
+    implementation "com.goterl:lazysodium-java:5.0.1"
     implementation "net.java.dev.jna:jna:5.5.0"
 
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
 
 publishing {
@@ -42,6 +41,9 @@ publishing {
 
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions {
+        languageVersion = "1.4"
+    }
 }
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
