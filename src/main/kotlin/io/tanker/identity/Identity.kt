@@ -83,6 +83,21 @@ class Identity {
         @JvmStatic
         fun upgradeIdentity(identity: String): String {
             val identityObj = Json.createReader(ByteArrayInputStream(fromBase64(identity))).readObject()
+
+            if (identityObj.getString("target") == "email" && !identityObj.containsKey("private_encryption_key")) {
+                val rawEmailValue = identityObj.getString("value")
+                val hashedEmailValue = toBase64(genericHash(rawEmailValue.toByteArray()))
+
+                // In an apparent attempt to minimize efficiency, JsonObjects are immutable. Return a copy.
+                return serializedOrderedJsonB64(
+                    "trustchain_id" to identityObj.getString("trustchain_id"),
+                    "target" to "hashed_email",
+                    "value" to hashedEmailValue,
+                    "public_signature_key" to identityObj.getString("public_signature_key"),
+                    "public_encryption_key" to identityObj.getString("public_encryption_key"),
+                )
+            }
+            
             val pairs = identityObj.mapValues { (_, v) -> (v as JsonString).string }.toList().toTypedArray()
             return serializedOrderedJsonB64(*pairs)
         }
