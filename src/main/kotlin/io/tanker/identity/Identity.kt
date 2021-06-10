@@ -60,10 +60,18 @@ class Identity {
                     "value" to identityObj.getString("value"),
                 )
             } else if (identityObj.containsKey("public_signature_key") && identityObj.containsKey("public_encryption_key")) {
+                var target = identityObj.getString("target")
+                var value = identityObj.getString("value")
+
+                if (target == "email") {
+                    target = "hashed_email"
+                    value = toBase64(genericHash(value.toByteArray()))
+                }
+
                 serializedOrderedJsonB64(
                     "trustchain_id" to identityObj.getString("trustchain_id"),
-                    "target" to identityObj.getString("target"),
-                    "value" to identityObj.getString("value"),
+                    "target" to target,
+                    "value" to value,
                     "public_signature_key" to identityObj.getString("public_signature_key"),
                     "public_encryption_key" to identityObj.getString("public_encryption_key"),
                 )

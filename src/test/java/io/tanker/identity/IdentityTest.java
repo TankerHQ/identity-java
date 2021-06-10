@@ -97,7 +97,7 @@ public class IdentityTest {
 
         assertEquals(publicIdentityObj.getString("public_signature_key"), identityObj.getString("public_signature_key"));
         assertEquals(publicIdentityObj.getString("public_encryption_key"), identityObj.getString("public_encryption_key"));
-        assertEquals(publicIdentityObj.getString("target"), "email");
+        assertEquals(publicIdentityObj.getString("target"), "hashed_email");
         assertEquals(publicIdentityObj.getString("trustchain_id"), appId);
     }
 
