@@ -37,15 +37,11 @@ def main():
     deploy_parser = subparsers.add_parser("deploy")
     deploy_parser.add_argument("--git-tag", required=True)
 
-    subparsers.add_parser("mirror")
-
     args = parser.parse_args()
     if args.command == "build-and-test":
         build_and_test()
     elif args.command == "deploy":
         deploy(git_tag=args.git_tag)
-    elif args.command == "mirror":
-        tankerci.git.mirror(github_url="git@github.com:TankerHQ/identity-java")
     else:
         parser.print_help()
         sys.exit(1)
