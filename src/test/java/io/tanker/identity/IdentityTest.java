@@ -65,7 +65,7 @@ public class IdentityTest {
     @Test
     public void testCreateProvisionalIdentity() {
         String email = "alice@tanker.io";
-        String identity = Identity.createProvisionalIdentity(appId, email);
+        String identity = Identity.createProvisionalIdentity(appId, "email", email);
 
         JsonObject identityObj = Json.createReader(new ByteArrayInputStream(Base64.getDecoder().decode(identity))).readObject();
 
@@ -90,7 +90,7 @@ public class IdentityTest {
     @Test
     public void testGetPublicProvisionalIdentity() {
         String email = "alice@tanker.io";
-        String identity = Identity.createProvisionalIdentity(appId, email);
+        String identity = Identity.createProvisionalIdentity(appId, "email", email);
         String publicIdentity = Identity.getPublicIdentity(identity);
 
         JsonObject identityObj = Json.createReader(new ByteArrayInputStream(Base64.getDecoder().decode(identity))).readObject();
@@ -110,7 +110,7 @@ public class IdentityTest {
         String email = "alice@tanker.io";
         String identity = Identity.createIdentity(appId, appSecret, "alice");
         String publicIdentity = Identity.getPublicIdentity(identity);
-        String provIdentity = Identity.createProvisionalIdentity(appId, email);
+        String provIdentity = Identity.createProvisionalIdentity(appId, "email", email);
         String publicProvIdentity = Identity.getPublicIdentity(provIdentity);
 
         String newIdentity = upgradeIdentity(identity);

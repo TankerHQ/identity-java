@@ -64,7 +64,7 @@ String identity = Identity.createIdentity(appId, appSecret, userId);
 Create a Tanker provisional identity. It allows you to share a resource with a user who does not have an account in your application yet. It must be served to an authenticated user, and attached client-side to access the resource. You will need to verifiy the associated email.
 
 ```java
-String identity = Identity.createProvisionalIdentity(appId, email);
+String identity = Identity.createProvisionalIdentity(appId, "email", email);
 ```
 
 | Parameters             |                                                                                        |
