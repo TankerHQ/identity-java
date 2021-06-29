@@ -70,6 +70,7 @@ class Identity {
                     target = "hashed_email"
                     value = toBase64(genericHash(value.toByteArray()))
                 } else if (target != "user") {
+                    target = "hashed_$target"
                     val salt = genericHash(fromBase64(identityObj.getString("private_signature_key")))
                     value = toBase64(genericHash(salt + value.toByteArray()))
                 }
