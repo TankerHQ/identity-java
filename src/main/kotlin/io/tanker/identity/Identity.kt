@@ -34,14 +34,17 @@ class Identity {
         }
 
         @JvmStatic
-        fun createProvisionalIdentity(appId: String, email: String): String {
+        fun createProvisionalIdentity(appId: String, target: String, value: String): String {
             val signatureKeyPair = LazySodium.cryptoSignKeypair()
             val encryptionKeyPair = LazySodium.cryptoBoxKeypair()
 
+            if (target != "email" && target != "phone_number")
+                throw IllegalArgumentException("Unsupported provisional identity target")
+
             return serializedOrderedJsonB64(
                 "trustchain_id" to appId,
-                "target" to "email",
-                "value" to email,
+                "target" to target,
+                "value" to value,
                 "public_encryption_key" to toBase64(encryptionKeyPair.publicKey.asBytes),
                 "private_encryption_key" to toBase64(encryptionKeyPair.secretKey.asBytes),
                 "public_signature_key" to toBase64(signatureKeyPair.publicKey.asBytes),
@@ -66,6 +69,10 @@ class Identity {
                 if (target == "email") {
                     target = "hashed_email"
                     value = toBase64(genericHash(value.toByteArray()))
+                } else if (target != "user") {
+                    target = "hashed_$target"
+                    val salt = genericHash(fromBase64(identityObj.getString("private_signature_key")))
+                    value = toBase64(genericHash(salt + value.toByteArray()))
                 }
 
                 serializedOrderedJsonB64(
