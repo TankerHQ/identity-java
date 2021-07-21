@@ -62,7 +62,7 @@ class Identity {
                     "target" to "user",
                     "value" to identityObj.getString("value"),
                 )
-            } else if (identityObj.containsKey("public_signature_key") && identityObj.containsKey("public_encryption_key")) {
+            } else {
                 var target = identityObj.getString("target")
                 var value = identityObj.getString("value")
 
@@ -84,8 +84,6 @@ class Identity {
                     "public_signature_key" to identityObj.getString("public_signature_key"),
                     "public_encryption_key" to identityObj.getString("public_encryption_key"),
                 )
-            } else {
-                throw IllegalArgumentException("not a valid Tanker identity")
             }
         }
 
