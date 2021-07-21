@@ -66,13 +66,15 @@ class Identity {
                 var target = identityObj.getString("target")
                 var value = identityObj.getString("value")
 
-                if (target == "email") {
-                    target = "hashed_email"
-                    value = toBase64(genericHash(value.toByteArray()))
-                } else if (target != "user") {
-                    target = "hashed_$target"
-                    val salt = genericHash(fromBase64(identityObj.getString("private_signature_key")))
-                    value = toBase64(genericHash(salt + value.toByteArray()))
+                if (target != "user") {
+                    if (target == "email") {
+                        target = "hashed_email"
+                        value = toBase64(genericHash(value.toByteArray()))
+                    } else {
+                        target = "hashed_$target"
+                        val salt = genericHash(fromBase64(identityObj.getString("private_signature_key")))
+                        value = toBase64(genericHash(salt + value.toByteArray()))
+                    }
                 }
 
                 serializedOrderedJsonB64(
