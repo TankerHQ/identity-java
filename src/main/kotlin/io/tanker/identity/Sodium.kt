@@ -1,6 +1,6 @@
 package io.tanker.identity
 
-import com.goterl.lazycode.lazysodium.LazySodiumJava
-import com.goterl.lazycode.lazysodium.SodiumJava
+import com.goterl.lazysodium.LazySodiumJava
+import com.goterl.lazysodium.SodiumJava
 
 internal val LazySodium = LazySodiumJava(SodiumJava())

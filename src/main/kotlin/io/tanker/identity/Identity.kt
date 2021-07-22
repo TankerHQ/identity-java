@@ -3,6 +3,7 @@ package io.tanker.identity
 import java.io.ByteArrayInputStream
 import java.util.*
 import javax.json.Json
+import javax.json.JsonString
 
 class Identity {
     companion object {
@@ -21,59 +22,91 @@ class Identity {
             val delegationSignature = cryptoSignDetached(toSign, appSecretB)
             val userSecret = generateUserSecret(hashedUserId)
 
-            val identityJson = Json.createObjectBuilder()
-                .add("trustchain_id", appId)
-                .add("target", "user")
-                .add("value", toBase64(hashedUserId))
-                .add("user_secret", toBase64(userSecret))
-                .add("ephemeral_public_signature_key", toBase64(ephemeralKeyPair.publicKey.asBytes))
-                .add("ephemeral_private_signature_key", toBase64(ephemeralKeyPair.secretKey.asBytes))
-                .add("delegation_signature", toBase64(delegationSignature))
-                .build()
-            return toBase64(identityJson.toString().toByteArray())
+            return serializedOrderedJsonB64(
+                "trustchain_id" to appId,
+                "target" to "user",
+                "value" to toBase64(hashedUserId),
+                "user_secret" to toBase64(userSecret),
+                "ephemeral_public_signature_key" to toBase64(ephemeralKeyPair.publicKey.asBytes),
+                "ephemeral_private_signature_key" to toBase64(ephemeralKeyPair.secretKey.asBytes),
+                "delegation_signature" to toBase64(delegationSignature),
+            )
         }
 
         @JvmStatic
-        fun createProvisionalIdentity(appId: String, email: String): String {
+        fun createProvisionalIdentity(appId: String, target: String, value: String): String {
             val signatureKeyPair = LazySodium.cryptoSignKeypair()
             val encryptionKeyPair = LazySodium.cryptoBoxKeypair()
 
-            val identityJson = Json.createObjectBuilder()
-                .add("trustchain_id", appId)
-                .add("target", "email")
-                .add("value", email)
-                .add("public_encryption_key", toBase64(encryptionKeyPair.publicKey.asBytes))
-                .add("private_encryption_key", toBase64(encryptionKeyPair.secretKey.asBytes))
-                .add("public_signature_key", toBase64(signatureKeyPair.publicKey.asBytes))
-                .add("private_signature_key", toBase64(signatureKeyPair.secretKey.asBytes))
-                .build()
-            return toBase64(identityJson.toString().toByteArray())
+            if (target != "email" && target != "phone_number")
+                throw IllegalArgumentException("Unsupported provisional identity target")
+
+            return serializedOrderedJsonB64(
+                "trustchain_id" to appId,
+                "target" to target,
+                "value" to value,
+                "public_encryption_key" to toBase64(encryptionKeyPair.publicKey.asBytes),
+                "private_encryption_key" to toBase64(encryptionKeyPair.secretKey.asBytes),
+                "public_signature_key" to toBase64(signatureKeyPair.publicKey.asBytes),
+                "private_signature_key" to toBase64(signatureKeyPair.secretKey.asBytes),
+            )
         }
 
         @JvmStatic
         fun getPublicIdentity(identity: String): String {
             val identityObj = Json.createReader(ByteArrayInputStream(fromBase64(identity))).readObject()
 
-            val publicIdentityObj =
-                if (identityObj.getString("target") == "user") {
-                    Json.createObjectBuilder()
-                        .add("trustchain_id", identityObj.getString("trustchain_id"))
-                        .add("target", "user")
-                        .add("value", identityObj.getString("value"))
-                        .build()
-                } else if (identityObj.containsKey("public_signature_key") && identityObj.containsKey("public_encryption_key")) {
-                    Json.createObjectBuilder()
-                        .add("trustchain_id", identityObj.getString("trustchain_id"))
-                        .add("target", identityObj.getString("target"))
-                        .add("value", identityObj.getString("value"))
-                        .add("public_signature_key", identityObj.getString("public_signature_key"))
-                        .add("public_encryption_key", identityObj.getString("public_encryption_key"))
-                        .build()
-                } else {
-                    throw IllegalArgumentException("not a valid Tanker identity")
+            return if (identityObj.getString("target") == "user") {
+                serializedOrderedJsonB64(
+                    "trustchain_id" to identityObj.getString("trustchain_id"),
+                    "target" to "user",
+                    "value" to identityObj.getString("value"),
+                )
+            } else {
+                var target = identityObj.getString("target")
+                var value = identityObj.getString("value")
+
+                if (target != "user") {
+                    if (target == "email") {
+                        target = "hashed_email"
+                        value = toBase64(genericHash(value.toByteArray()))
+                    } else {
+                        target = "hashed_$target"
+                        val salt = genericHash(fromBase64(identityObj.getString("private_signature_key")))
+                        value = toBase64(genericHash(salt + value.toByteArray()))
+                    }
                 }
 
-            return toBase64(publicIdentityObj.toString().toByteArray())
+                serializedOrderedJsonB64(
+                    "trustchain_id" to identityObj.getString("trustchain_id"),
+                    "target" to target,
+                    "value" to value,
+                    "public_signature_key" to identityObj.getString("public_signature_key"),
+                    "public_encryption_key" to identityObj.getString("public_encryption_key"),
+                )
+            }
+        }
+
+        @JvmStatic
+        fun upgradeIdentity(identity: String): String {
+            val identityObj = Json.createReader(ByteArrayInputStream(fromBase64(identity))).readObject()
+
+            if (identityObj.getString("target") == "email" && !identityObj.containsKey("private_encryption_key")) {
+                val rawEmailValue = identityObj.getString("value")
+                val hashedEmailValue = toBase64(genericHash(rawEmailValue.toByteArray()))
+
+                // In an apparent attempt to minimize efficiency, JsonObjects are immutable. Return a copy.
+                return serializedOrderedJsonB64(
+                    "trustchain_id" to identityObj.getString("trustchain_id"),
+                    "target" to "hashed_email",
+                    "value" to hashedEmailValue,
+                    "public_signature_key" to identityObj.getString("public_signature_key"),
+                    "public_encryption_key" to identityObj.getString("public_encryption_key"),
+                )
+            }
+            
+            val pairs = identityObj.mapValues { (_, v) -> (v as JsonString).string }.toList().toTypedArray()
+            return serializedOrderedJsonB64(*pairs)
         }
     }
 }
