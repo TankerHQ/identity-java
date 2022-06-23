@@ -8,6 +8,7 @@ import javax.json.JsonString
 class Identity {
     companion object {
         @JvmStatic
+        @Deprecated("Discontinued package: Use another identity package cf. https://github.com/TankerHQ?q=identity")
         fun createIdentity(appId: String, appSecret: String, userId: String): String {
             val appIdB = Base64.getDecoder().decode(appId)
             val appSecretB = Base64.getDecoder().decode(appSecret)
@@ -34,6 +35,7 @@ class Identity {
         }
 
         @JvmStatic
+        @Deprecated("Discontinued package: Use another identity package cf. https://github.com/TankerHQ?q=identity")
         fun createProvisionalIdentity(appId: String, target: String, value: String): String {
             val signatureKeyPair = LazySodium.cryptoSignKeypair()
             val encryptionKeyPair = LazySodium.cryptoBoxKeypair()
@@ -53,6 +55,7 @@ class Identity {
         }
 
         @JvmStatic
+        @Deprecated("Discontinued package: Use another identity package cf. https://github.com/TankerHQ?q=identity")
         fun getPublicIdentity(identity: String): String {
             val identityObj = Json.createReader(ByteArrayInputStream(fromBase64(identity))).readObject()
 
@@ -88,6 +91,7 @@ class Identity {
         }
 
         @JvmStatic
+        @Deprecated("Discontinued package: Use another identity package cf. https://github.com/TankerHQ?q=identity")
         fun upgradeIdentity(identity: String): String {
             val identityObj = Json.createReader(ByteArrayInputStream(fromBase64(identity))).readObject()
 

@@ -13,6 +13,9 @@
 ![Gradle][gradle-badge]
 ![Last Commit][last-commit-badge]
 
+!!! warning
+    This package is no longer supported. You can find identity packages available in other language at https://github.com/TankerHQ?q=identity
+
 # Installation and usage
 
 The Tanker Identity SDK is distributed as a Maven package.
